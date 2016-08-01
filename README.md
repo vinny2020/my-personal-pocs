@@ -1,2 +1,2 @@
-# my-personal-pocs
-Proof of concept examples for my own sanity checks
+# Vince's Proof of Concepts 
+Proof of concepts and sanity checks
