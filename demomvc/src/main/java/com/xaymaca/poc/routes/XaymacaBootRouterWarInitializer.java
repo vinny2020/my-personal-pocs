@@ -9,6 +9,6 @@ import org.apache.camel.spring.boot.FatWarInitializer;
 public class XaymacaBootRouterWarInitializer extends FatWarInitializer {
     @Override
     protected Class<? extends FatJarRouter> routerClass() {
-        return XaymacaServices.class;
+        return XaymacaBootServices.class;
     }
 }

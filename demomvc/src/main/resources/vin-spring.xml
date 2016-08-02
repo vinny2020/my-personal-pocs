@@ -4,6 +4,5 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 
-    <bean class="com.xaymaca.poc.routes.XaymacaServices" id="xaymacaServices"/>
 
 </beans>
