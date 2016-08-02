@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xaymaca.poc.model.CurrentExchangeRate;
 import com.xaymaca.poc.model.TrendingRateInquiry;
 import com.xaymaca.poc.model.TrendingResult;
-import junit.framework.Assert;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Processor;
@@ -18,13 +17,17 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 import static com.xaymaca.poc.asyncUtils.BrexitToFixerIOAsyncRequests.fetchData;
 
@@ -146,7 +149,7 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
         trendingResult.setBaseCurrency("GBP");
         trendingResult.setTargetCurrency("USD");
 
-        Assert.assertTrue(currentExchangeRates.size() == 15);
+        Assert.assertTrue(currentExchangeRates.size() == 2);
         trendingResult.setRates(currentExchangeRates);
 
         String trendResultJSON =  mapper.writeValueAsString(trendingResult);
@@ -224,7 +227,7 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
         }
 
         returnedRates =  fetchData(httpGets, targetCurrency, howManyUnits);
-        Collections.sort(returnedRates);
+//        Collections.sort(returnedRates);
 
         TrendingResult trendingResult = new TrendingResult(1,baseCurrency,targetCurrency,"now",today.toLocalDate().toString(),returnedRates);
        // System.out.println(" ***   ****   returned this many results" + trendingResult.getRates().size());
