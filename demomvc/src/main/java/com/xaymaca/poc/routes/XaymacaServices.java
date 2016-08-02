@@ -2,14 +2,14 @@ package com.xaymaca.poc.routes;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.builder.RouteBuilder;
-import org.springframework.stereotype.Component;
+import org.apache.camel.spring.boot.FatJarRouter;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * Created by Vincent Stoessel on August 01, 2016.
  */
-@Component
-public class XaymacaServices extends RouteBuilder {
+@SpringBootApplication
+public class XaymacaServices extends FatJarRouter {
 
     @Override
     public void configure() throws Exception {
@@ -25,7 +25,7 @@ public class XaymacaServices extends RouteBuilder {
                 })
 
         .from("restlet:/echo-query-string?restletMethods=get")
-                .removeHeaders("CamelHttp*")
+                .removeHeaders("CamelHttp*",Exchange.HTTP_QUERY )
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
