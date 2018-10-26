@@ -49,7 +49,7 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
             public void configure() throws Exception {
                 from("direct:getLatest")
                         .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                        .to("http://api.fixer.io/2016-07-04?base=GBP&symbols=USD")
+                        .to("http://api.fixer.io/2016-07-04?base=EUR&symbols=USD")
                         .process(new Processor() {
                             @Override
                             public void process(Exchange exchange) throws Exception {
@@ -84,7 +84,7 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
         MockEndpoint serviceResult = getMockEndpoint("mock:result");
          template.sendBody("direct:getLatest","");
         serviceResult.expectedMessageCount(1);
-        String fourthOfJulyExpected = "{\"base\":\"GBP\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.3275}}";
+        String fourthOfJulyExpected = "{\"base\":\"EUR\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.3275}}";
         String fourthOfJuly2016Query = IOUtils.toString((InputStream) serviceResult.getExchanges().get(0).getIn().getBody())  ;
         Assert.assertTrue(StringUtils.isNotEmpty(fourthOfJuly2016Query));
         Assert.assertEquals(fourthOfJulyExpected,fourthOfJuly2016Query);
@@ -97,8 +97,8 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
     @Test
     public void testGetLatestExchangeDynamically() throws InterruptedException, IOException {
         MockEndpoint mockEndpoint = getMockEndpoint("mock:getLatestDynamic");
-        String fourthOfJuly2016Query1 = IOUtils.toString((InputStream) template.requestBodyAndHeader("direct:getLatestDynamic","",Exchange.HTTP_QUERY,"base=GBP&symbols=USD"));
-        String fourthOfJulyExpected1 = "{\"base\":\"GBP\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.3275}}";
+        String fourthOfJuly2016Query1 = IOUtils.toString((InputStream) template.requestBodyAndHeader("direct:getLatestDynamic","",Exchange.HTTP_QUERY,"base=EUR&symbols=USD"));
+        String fourthOfJulyExpected1 = "{\"base\":\"EUR\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.3275}}";
         Assert.assertTrue(StringUtils.isNotEmpty(fourthOfJuly2016Query1));
         Assert.assertEquals(fourthOfJulyExpected1,fourthOfJuly2016Query1);
         mockEndpoint.assertIsSatisfied();
@@ -109,8 +109,8 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
     @Test
     public void testGetRateInJSON() throws InterruptedException, IOException {
         MockEndpoint jsonResult = getMockEndpoint("mock:getLatestDynamic");
-        String fourthOfJuly2016Query = IOUtils.toString((InputStream) template.requestBodyAndHeader("direct:getLatestDynamic","",Exchange.HTTP_QUERY,"base=GBP&symbols=USD"));
-        String fourthOfJulyExpected = "{\"base\":\"GBP\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.3275}}";
+        String fourthOfJuly2016Query = IOUtils.toString((InputStream) template.requestBodyAndHeader("direct:getLatestDynamic","",Exchange.HTTP_QUERY,"base=EUR&symbols=USD"));
+        String fourthOfJulyExpected = "{\"base\":\"EUR\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.3275}}";
         Assert.assertTrue(StringUtils.isNotEmpty(fourthOfJuly2016Query));
         Assert.assertEquals(fourthOfJulyExpected,fourthOfJuly2016Query);
         jsonResult.assertIsSatisfied();
@@ -125,7 +125,7 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
         ObjectMapper mapper = new ObjectMapper();
         TrendingRateInquiry trendingRateInquiry = new TrendingRateInquiry();
         trendingRateInquiry.setBaseCurrency("USD");
-        trendingRateInquiry.setTargetCurrency("GBP");
+        trendingRateInquiry.setTargetCurrency("EUR");
 
         TimeZone tz = TimeZone.getTimeZone("UTC");
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
@@ -146,7 +146,7 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
         currentExchangeRates.add(currentExchangeRate1);
         trendingResult.setInterval("month");
         trendingResult.setQuantity(1);
-        trendingResult.setBaseCurrency("GBP");
+        trendingResult.setBaseCurrency("EUR");
         trendingResult.setTargetCurrency("USD");
 
         Assert.assertTrue(currentExchangeRates.size() == 2);
@@ -175,7 +175,7 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
 
         //first get me the right dates
 
-        String rawIncomingJSON = "{\"quantity\":10,\"baseCurrency\":\"GBP\",\"targetCurrency\":\"USD\",\"interval\":\"now\"}";
+        String rawIncomingJSON = "{\"quantity\":10,\"baseCurrency\":\"EUR\",\"targetCurrency\":\"USD\",\"interval\":\"now\"}";
 
         TrendingRateInquiry inquiry=   mapper.readValue(rawIncomingJSON, TrendingRateInquiry.class);
 
