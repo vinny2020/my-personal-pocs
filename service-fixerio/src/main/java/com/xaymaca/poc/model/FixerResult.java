@@ -1,12 +1,14 @@
 package com.xaymaca.poc.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.Map;
 
 /**
  * Created by Vincent Stoessel on July 08, 2016.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FixerResult {
-
     /*
     fixer.io response:
     docs: https://fixer.io/documentation
@@ -70,5 +72,14 @@ public class FixerResult {
 
     public void setRates(Map<String, Float> rates) {
         this.rates = rates;
+    }
+
+    @Override
+    public String toString() {
+        return "FixerResult{" +
+                "base='" + base + '\'' +
+                ", date='" + date + '\'' +
+                ", rates=" + rates +
+                '}';
     }
 }

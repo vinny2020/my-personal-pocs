@@ -6,11 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xaymaca.poc.model.CurrentExchangeRate;
 import com.xaymaca.poc.model.TrendingRateInquiry;
 import com.xaymaca.poc.model.TrendingResult;
+import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.component.properties.PropertiesComponent;
+import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -19,28 +22,44 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 import static com.xaymaca.poc.asyncUtils.BrexitToFixerIOAsyncRequests.fetchData;
 
 /**
  * Created by Vincent Stoessel on July 07, 2016.
- *
- *
+ * TODO refactor to use java.time , build FE
  */
 public class CurrencyExchangeServiceTest extends CamelTestSupport {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CurrencyExchangeServiceTest.class);
 
 
-    ObjectMapper mapper = new ObjectMapper();
+    final static ObjectMapper mapper = new ObjectMapper();
+    CamelContext camelContext;
+
+
+    @Override
+    protected CamelContext createCamelContext() throws Exception {
+
+        JndiRegistry registry = new JndiRegistry();
+
+        CamelContext camelContext = new DefaultCamelContext(registry);
+        PropertiesComponent pc = new PropertiesComponent();
+        pc.setLocation("file:${env:EXT_LOCATION}/external.properties");
+        camelContext.addComponent("properties", pc);
+        this.camelContext = camelContext;
+
+        return camelContext;
+    }
+
 
     @Override
     protected RouteBuilder createRouteBuilder() {
@@ -49,80 +68,57 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
             public void configure() throws Exception {
                 from("direct:getLatest")
                         .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                        .to("http://api.fixer.io/2016-07-04?base=EUR&symbols=USD")
-                        .process(new Processor() {
-                            @Override
-                            public void process(Exchange exchange) throws Exception {
-                                System.out.println("we got " + exchange.getIn().getBody());
-                            }
-                        })
-                .to("mock:result");
+                        .to("http://data.fixer.io/2016-07-04?access_key={{fixer.io.key}}&base=EUR&symbols=USD")
+                        .to("mock:result");
 
                 from("direct:getLatestDynamic")
                         .setExchangePattern(ExchangePattern.InOut)
                         .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                        .to("http://api.fixer.io/2016-07-04")
+                        .setHeader(Exchange.HTTP_QUERY, simple("access_key={{fixer.io.key}}&base=EUR&symbols=USD"))
+                        .to("http://data.fixer.io/2016-07-04?access_key={{fixer.io.key}}")
                         .to("mock:dynamicResult");
+
 
                 from("direct:get100")
                         .setExchangePattern(ExchangePattern.InOut)
                         .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                        .to("http://api.fixer.io")
+                        .to("http://data.fixer.io?access_key={{fixer.io.key}}")
                         .to("mock:yearTrend");
-
-
-
             }
         };
+
+
     }
-
-
 
 
     @Test
     public void testGetLatestExchange() throws InterruptedException, IOException {
         MockEndpoint serviceResult = getMockEndpoint("mock:result");
-         template.sendBody("direct:getLatest","");
+        template.sendBody("direct:getLatest", "");
         serviceResult.expectedMessageCount(1);
-        String fourthOfJulyExpected = "{\"base\":\"EUR\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.3275}}";
-        String fourthOfJuly2016Query = IOUtils.toString((InputStream) serviceResult.getExchanges().get(0).getIn().getBody())  ;
+        String fourthOfJulyExpected = "{\"success\":true,\"timestamp\":1467676799,\"historical\":true,\"base\":\"EUR\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.114951}}";
+        String fourthOfJuly2016Query = IOUtils.toString((InputStream) serviceResult.getExchanges().get(0).getIn().getBody());
         Assert.assertTrue(StringUtils.isNotEmpty(fourthOfJuly2016Query));
-        Assert.assertEquals(fourthOfJulyExpected,fourthOfJuly2016Query);
+        Assert.assertEquals(fourthOfJulyExpected, fourthOfJuly2016Query);
         serviceResult.assertIsSatisfied();
 
-
     }
 
 
     @Test
-    public void testGetLatestExchangeDynamically() throws InterruptedException, IOException {
-        MockEndpoint mockEndpoint = getMockEndpoint("mock:getLatestDynamic");
-        String fourthOfJuly2016Query1 = IOUtils.toString((InputStream) template.requestBodyAndHeader("direct:getLatestDynamic","",Exchange.HTTP_QUERY,"base=EUR&symbols=USD"));
-        String fourthOfJulyExpected1 = "{\"base\":\"EUR\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.3275}}";
-        Assert.assertTrue(StringUtils.isNotEmpty(fourthOfJuly2016Query1));
-        Assert.assertEquals(fourthOfJulyExpected1,fourthOfJuly2016Query1);
-        mockEndpoint.assertIsSatisfied();
-
-
-    }
-
-    @Test
-    public void testGetRateInJSON() throws InterruptedException, IOException {
+    public void testGetLatestExchangeDynamicallyInJson() throws InterruptedException, IOException {
         MockEndpoint jsonResult = getMockEndpoint("mock:getLatestDynamic");
-        String fourthOfJuly2016Query = IOUtils.toString((InputStream) template.requestBodyAndHeader("direct:getLatestDynamic","",Exchange.HTTP_QUERY,"base=EUR&symbols=USD"));
-        String fourthOfJulyExpected = "{\"base\":\"EUR\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.3275}}";
+        String fourthOfJuly2016Query = IOUtils.toString((InputStream) template.requestBody("direct:getLatestDynamic", ""));
+        String fourthOfJuly2016Expected = "{\"success\":true,\"timestamp\":1467676799,\"historical\":true,\"base\":\"EUR\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.114951}}";
         Assert.assertTrue(StringUtils.isNotEmpty(fourthOfJuly2016Query));
-        Assert.assertEquals(fourthOfJulyExpected,fourthOfJuly2016Query);
+        Assert.assertEquals(fourthOfJuly2016Expected, fourthOfJuly2016Query);
         jsonResult.assertIsSatisfied();
-
-
     }
 
 
     @Test
     public void testShowJSON() throws JsonProcessingException {
 
-        ObjectMapper mapper = new ObjectMapper();
         TrendingRateInquiry trendingRateInquiry = new TrendingRateInquiry();
         trendingRateInquiry.setBaseCurrency("USD");
         trendingRateInquiry.setTargetCurrency("EUR");
@@ -131,15 +127,11 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
         df.setTimeZone(tz);
 
-
         trendingRateInquiry.setQuantity(10);
         trendingRateInquiry.setInterval("month");
 
-
-      String json =   mapper.writeValueAsString( trendingRateInquiry);
-
         TrendingResult trendingResult = new TrendingResult();
-        CurrentExchangeRate currentExchangeRate = new CurrentExchangeRate("2016-07-04",1.341f,  new LocalDate(new Date()));
+        CurrentExchangeRate currentExchangeRate = new CurrentExchangeRate("2016-07-04", 1.341f, new LocalDate(new Date()));
         CurrentExchangeRate currentExchangeRate1 = new CurrentExchangeRate("2016-07-05", 1.313f, new LocalDate(new Date()));
         List<CurrentExchangeRate> currentExchangeRates = new ArrayList<>();
         currentExchangeRates.add(currentExchangeRate);
@@ -152,43 +144,29 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
         Assert.assertTrue(currentExchangeRates.size() == 2);
         trendingResult.setRates(currentExchangeRates);
 
-        String trendResultJSON =  mapper.writeValueAsString(trendingResult);
-
-
-
-
-        System.out.println("**************  The JSON is " + trendResultJSON  + " *********************");
-
+        String trendResultJSON = mapper.writeValueAsString(trendingResult);
+        LOGGER.debug("**************  The JSON is " + trendResultJSON + " *********************");
 
     }
 
 
-
-
     @Test
-    public void testCollectorByYear() throws IOException, InterruptedException {
+    public void testCollectorByYear() throws Exception {
 
         MockEndpoint jsonResult = getMockEndpoint("mock:yearTrend");
-        List<CurrentExchangeRate> returnedRates= new ArrayList<>();
+        List<CurrentExchangeRate> returnedRates;
         List<HttpGet> httpGets = new ArrayList<HttpGet>();
-
 
         //first get me the right dates
 
         String rawIncomingJSON = "{\"quantity\":10,\"baseCurrency\":\"EUR\",\"targetCurrency\":\"USD\",\"interval\":\"now\"}";
 
-        TrendingRateInquiry inquiry=   mapper.readValue(rawIncomingJSON, TrendingRateInquiry.class);
+        TrendingRateInquiry inquiry = mapper.readValue(rawIncomingJSON, TrendingRateInquiry.class);
 
 
         String soughtInterval = inquiry.getInterval();
         int numberedInterval = getNumberedInterval(soughtInterval);
         int howManyUnits = inquiry.getQuantity();
-
-
-
-
-
-
 
 
         List<String> queryDates = new ArrayList<>();
@@ -199,75 +177,46 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
         int interval = numberedInterval;
         DateTime today = new DateTime();
 
-        for(int i =0; i<=interval; i++) {
+        for (int i = 0; i <= interval; i++) {
 
-            String date =  today.minusDays(i).toLocalDate().toString() ;
+            String date = today.minusDays(i).toLocalDate().toString();
 
 
-                queryDates.add(date);
-//                String url = "http://api.fixer.io/" + date + "?base=" + baseCurrency +  "&symbols=" + targetCurrency ;
-//
-//                httpGets.add(new HttpGet(url));
+            queryDates.add(date);
+
+            String accessKey = camelContext.resolvePropertyPlaceholders("{{fixer.io.key}}");
+
+            for (String dateString : queryDates) {
+                String url = "http://data.fixer.io/" + dateString + "?access_key=" + accessKey + "&base=" + baseCurrency + "&symbols=" + targetCurrency;
+                httpGets.add(new HttpGet(url));
+
             }
 
+            returnedRates = fetchData(httpGets, targetCurrency, howManyUnits);
+            TrendingResult trendingResult = new TrendingResult(1, baseCurrency, targetCurrency, "now", today.toLocalDate().toString(), returnedRates);
+            // LOGGER.debug(" ***   ****   returned this many results" + trendingResult.getRates().size());
 
-
-     //  Collections.reverse(queryDates);
-    //    Assert.assertTrue(queryDates.size() == 11);
-
-
-
-        for(String date : queryDates) {
-
-                String url = "http://api.fixer.io/" + date + "?base=" + baseCurrency +  "&symbols=" + targetCurrency ;
-
-                httpGets.add(new HttpGet(url));
+            LOGGER.info(mapper.writeValueAsString(trendingResult));
+            jsonResult.assertIsSatisfied();
 
 
         }
-
-        returnedRates =  fetchData(httpGets, targetCurrency, howManyUnits);
-//        Collections.sort(returnedRates);
-
-        TrendingResult trendingResult = new TrendingResult(1,baseCurrency,targetCurrency,"now",today.toLocalDate().toString(),returnedRates);
-       // System.out.println(" ***   ****   returned this many results" + trendingResult.getRates().size());
-
-        System.out.println(mapper.writeValueAsString(trendingResult));
-        jsonResult.assertIsSatisfied();
-
-
-
-
-
     }
+
 
     private int getNumberedInterval(String soughtInterval) {
         int numberedInterval = 0;
-        if(soughtInterval.equals("now")) {
+        if (soughtInterval.equals("now")) {
             numberedInterval = 15;
-        }
-        else if(soughtInterval.equals("month")) {
+        } else if (soughtInterval.equals("month")) {
             numberedInterval = 30;
-        }
-        else if(soughtInterval.equals("3month")) {
+        } else if (soughtInterval.equals("3month")) {
             numberedInterval = 90;
-        }
-        else if(soughtInterval.equals("year")) {
+        } else if (soughtInterval.equals("year")) {
             numberedInterval = 365;
         }
         return numberedInterval;
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

@@ -34,13 +34,10 @@ public class BrexitToFixerIOAsyncRequests {
     private static ObjectMapper objectMapper = new ObjectMapper();
     private static ObjectReader fixerReader = objectMapper.reader(FixerResult.class);
 
-    public  static List<CurrentExchangeRate> fetchData(List<HttpGet> httpGets, final String targetCurrency, final Integer howMany) throws InterruptedException, IOException {
+    public static List<CurrentExchangeRate> fetchData(List<HttpGet> httpGets, final String targetCurrency, final Integer howMany) throws InterruptedException, IOException {
 
-        final CopyOnWriteArrayList<CurrentExchangeRate> currentExchangeRates = new CopyOnWriteArrayList();
-
-
+        final CopyOnWriteArrayList<CurrentExchangeRate> currentExchangeRates = new CopyOnWriteArrayList<>();
         final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
-
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setSocketTimeout(3000)
@@ -61,18 +58,16 @@ public class BrexitToFixerIOAsyncRequests {
             httpAsyncClient.start();
             final CountDownLatch latch = new CountDownLatch(httpGets.size());
 
-
-
             for (final HttpGet request : requests) {
-                 httpAsyncClient.execute(request, new FutureCallback<HttpResponse>() {
+                httpAsyncClient.execute(request, new FutureCallback<HttpResponse>() {
 
                     @Override
                     public void completed(final HttpResponse response) {
                         latch.countDown();
                         try {
                             FixerResult resultObj = fixerReader.readValue(response.getEntity().getContent());
-                            if ( null == resultObj.getDate() ){
-                                LOGGER.debug("Our bad result were : " + resultObj.toString());
+                            if (null == resultObj.getDate()) {
+                                LOGGER.info("Our bad result were : " + resultObj.toString());
                             }
                             currentExchangeRates.add(new CurrentExchangeRate(resultObj.getDate(), resultObj.getRates().get(targetCurrency) * howMany, formatter.parseLocalDate(resultObj.getDate())));
                         } catch (IOException e) {
@@ -91,7 +86,6 @@ public class BrexitToFixerIOAsyncRequests {
                         latch.countDown();
                         LOGGER.info(request.getRequestLine() + " cancelled");
                     }
-
                 });
             }
             latch.await();
