@@ -12,7 +12,7 @@
     <modules>
         <module>demomvc</module>
         <module>camel-with-cdi</module>
-        <module>service-fixerio</module>
+        <module>currency-service-fixerio</module>
     </modules>
 
 </project>
