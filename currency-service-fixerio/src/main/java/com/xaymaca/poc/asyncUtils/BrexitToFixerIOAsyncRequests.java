@@ -52,8 +52,8 @@ public class BrexitToFixerIOAsyncRequests {
 
         try (CloseableHttpAsyncClient httpAsyncClient = HttpAsyncClients.custom()
                 .setDefaultRequestConfig(requestConfig)
-                .setMaxConnPerRoute(400)
-                .setMaxConnTotal(400)
+                .setMaxConnPerRoute(200)
+                .setMaxConnTotal(200)
                 .build()) {
             httpAsyncClient.start();
             final CountDownLatch latch = new CountDownLatch(httpGets.size());

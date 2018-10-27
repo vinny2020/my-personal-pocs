@@ -53,7 +53,7 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
 
         CamelContext camelContext = new DefaultCamelContext(registry);
         PropertiesComponent pc = new PropertiesComponent();
-        pc.setLocation("file:${env:EXT_LOCATION}/external.properties");
+        pc.setLocation("classpath:/external.properties");
         camelContext.addComponent("properties", pc);
         this.camelContext = camelContext;
 
