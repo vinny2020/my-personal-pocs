@@ -6,26 +6,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.joda.time.LocalDate;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for model classes
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("Model Classes Tests")
 public class ModelClassesTest {
-
-    @Mock
-    private FixerResult mockFixerResult;
 
     @BeforeEach
     void setUp() {
@@ -122,11 +114,12 @@ public class ModelClassesTest {
     }
 
     @Test
-    @DisplayName("Should create mock FixerResult")
-    void shouldCreateMockFixerResult() {
+    @DisplayName("Should create FixerResult instance")
+    void shouldCreateFixerResultInstance() {
         // When & Then
-        assertNotNull(mockFixerResult, "Mock FixerResult should be created");
-        assertTrue(mockFixerResult instanceof FixerResult, 
+        FixerResult result = new FixerResult();
+        assertNotNull(result, "FixerResult should be created");
+        assertTrue(result instanceof FixerResult, 
             "Should be a FixerResult instance");
     }
 

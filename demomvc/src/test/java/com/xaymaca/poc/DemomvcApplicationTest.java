@@ -3,25 +3,17 @@ package com.xaymaca.poc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for DemomvcApplication
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("DemomvcApplication Tests")
 @SpringBootTest
 public class DemomvcApplicationTest {
-
-    @Mock
-    private DemomvcApplication mockApplication;
 
     private DemomvcApplication application;
 
@@ -81,11 +73,12 @@ public class DemomvcApplicationTest {
     }
 
     @Test
-    @DisplayName("Should create mock DemomvcApplication")
-    void shouldCreateMockDemomvcApplication() {
+    @DisplayName("Should create new DemomvcApplication instance")
+    void shouldCreateNewDemomvcApplicationInstance() {
         // When & Then
-        assertNotNull(mockApplication, "Mock DemomvcApplication should be created");
-        assertTrue(mockApplication instanceof DemomvcApplication, 
+        DemomvcApplication instance = new DemomvcApplication();
+        assertNotNull(instance, "DemomvcApplication should be created");
+        assertTrue(instance instanceof DemomvcApplication, 
             "Should be a DemomvcApplication instance");
     }
 

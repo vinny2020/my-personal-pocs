@@ -4,22 +4,14 @@ import org.apache.camel.spring.boot.FatJarRouter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for XaymacaBootRouterWarInitializer
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("XaymacaBootRouterWarInitializer Tests")
 public class XaymacaBootRouterWarInitializerTest {
-
-    @Mock
-    private XaymacaBootRouterWarInitializer mockInitializer;
 
     private XaymacaBootRouterWarInitializer initializer;
 
@@ -99,11 +91,12 @@ public class XaymacaBootRouterWarInitializerTest {
     }
 
     @Test
-    @DisplayName("Should create mock XaymacaBootRouterWarInitializer")
-    void shouldCreateMockXaymacaBootRouterWarInitializer() {
+    @DisplayName("Should create new XaymacaBootRouterWarInitializer instance")
+    void shouldCreateNewXaymacaBootRouterWarInitializerInstance() {
         // When & Then
-        assertNotNull(mockInitializer, "Mock XaymacaBootRouterWarInitializer should be created");
-        assertTrue(mockInitializer instanceof XaymacaBootRouterWarInitializer, 
+        XaymacaBootRouterWarInitializer instance = new XaymacaBootRouterWarInitializer();
+        assertNotNull(instance, "XaymacaBootRouterWarInitializer should be created");
+        assertTrue(instance instanceof XaymacaBootRouterWarInitializer, 
             "Should be a XaymacaBootRouterWarInitializer instance");
     }
 

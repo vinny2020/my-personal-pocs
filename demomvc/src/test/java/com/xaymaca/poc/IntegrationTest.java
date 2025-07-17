@@ -5,19 +5,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Integration tests for demomvc module
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("Integration Tests")
 @SpringBootTest
 @TestPropertySource(properties = {
@@ -25,9 +20,6 @@ import static org.mockito.Mockito.*;
     "camel.springboot.main-run-controller=false"
 })
 public class IntegrationTest {
-
-    @Mock
-    private DemomvcApplication mockApplication;
 
     @Test
     @DisplayName("Should load Spring Boot context")
@@ -118,11 +110,12 @@ public class IntegrationTest {
     }
 
     @Test
-    @DisplayName("Should create mock application")
-    void shouldCreateMockApplication() {
+    @DisplayName("Should create application instance")
+    void shouldCreateApplicationInstance() {
         // When & Then
-        assertNotNull(mockApplication, "Mock DemomvcApplication should be created");
-        assertTrue(mockApplication instanceof DemomvcApplication, 
+        DemomvcApplication instance = new DemomvcApplication();
+        assertNotNull(instance, "DemomvcApplication should be created");
+        assertTrue(instance instanceof DemomvcApplication, 
             "Should be a DemomvcApplication instance");
     }
 

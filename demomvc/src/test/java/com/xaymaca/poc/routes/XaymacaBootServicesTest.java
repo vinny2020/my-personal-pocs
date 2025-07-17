@@ -10,32 +10,15 @@ import org.apache.camel.spring.boot.FatJarRouter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for XaymacaBootServices
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("XaymacaBootServices Tests")
 public class XaymacaBootServicesTest {
-
-    @Mock
-    private XaymacaBootServices mockServices;
-
-    @Mock
-    private Exchange mockExchange;
-
-    @Mock
-    private NettyHttpMessage mockNettyMessage;
-
-    @Mock
-    private FullHttpRequest mockHttpRequest;
 
     private XaymacaBootServices services;
 
@@ -111,11 +94,12 @@ public class XaymacaBootServicesTest {
     }
 
     @Test
-    @DisplayName("Should create mock XaymacaBootServices")
-    void shouldCreateMockXaymacaBootServices() {
+    @DisplayName("Should create new XaymacaBootServices instance")
+    void shouldCreateNewXaymacaBootServicesInstance() {
         // When & Then
-        assertNotNull(mockServices, "Mock XaymacaBootServices should be created");
-        assertTrue(mockServices instanceof XaymacaBootServices, 
+        XaymacaBootServices instance = new XaymacaBootServices();
+        assertNotNull(instance, "XaymacaBootServices should be created");
+        assertTrue(instance instanceof XaymacaBootServices, 
             "Should be a XaymacaBootServices instance");
     }
 
