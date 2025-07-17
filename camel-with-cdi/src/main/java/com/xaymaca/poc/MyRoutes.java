@@ -1,11 +1,8 @@
 package com.xaymaca.poc;
 
-import javax.inject.Inject;
-
+import jakarta.inject.Inject;
 import org.apache.camel.Endpoint;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.cdi.ContextName;
-import org.apache.camel.cdi.Uri;
 
 /**
  * Configures all our Camel routes, components, endpoints and beans
@@ -13,20 +10,16 @@ import org.apache.camel.cdi.Uri;
 public class MyRoutes extends RouteBuilder {
 
     @Inject
-    @Uri("timer:foo?period=5000")
-    private Endpoint inputEndpoint;
+    Endpoint inputEndpoint;
 
     @Inject
-    @Uri("log:output")
-    private Endpoint resultEndpoint;
+    Endpoint resultEndpoint;
 
     @Override
     public void configure() {
         // you can configure the route rule with Java DSL here
-
-        from(inputEndpoint)
+        from("timer:foo?period=5000")
             .to("bean:counterBean")
-            .to(resultEndpoint);
+            .to("log:output");
     }
-
 }

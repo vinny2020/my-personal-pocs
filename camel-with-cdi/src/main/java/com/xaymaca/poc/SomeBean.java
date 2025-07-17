@@ -1,16 +1,14 @@
 package com.xaymaca.poc;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
+import jakarta.inject.Named;
 
 @Singleton
 @Named("counterBean")
 public class SomeBean {
-
     private int counter;
 
-    public String someMethod(String body) {
-        return "Saying Hello World " + ++counter + " times";
+    public int count() {
+        return ++counter;
     }
-
 }
