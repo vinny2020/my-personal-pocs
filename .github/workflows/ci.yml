@@ -27,6 +27,11 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     
+    - name: Verify properties file exists
+      run: |
+        ls -la currency-service-fixerio/src/main/resources/
+        cat currency-service-fixerio/src/main/resources/external.properties
+    
     - name: Build with Maven
       run: mvn clean install
     

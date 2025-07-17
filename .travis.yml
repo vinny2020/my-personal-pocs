@@ -1,6 +1,0 @@
-language: java
-jdk:
-- oraclejdk8
-before_install:
-- openssl aes-256-cbc -K $encrypted_a712b980925a_key -iv $encrypted_a712b980925a_iv
-  -in currency-service-fixerio/src/main/resources/external.properties.enc -out currency-service-fixerio/src/main/resources/external.properties -d
