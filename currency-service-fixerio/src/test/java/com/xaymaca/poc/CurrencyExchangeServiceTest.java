@@ -66,23 +66,23 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
         return new RouteBuilder() {
             @Override
             public void configure() throws Exception {
+                // Replace real HTTP endpoint with mock endpoint for testing
                 from("direct:getLatest")
                         .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                        .to("http://data.fixer.io/2016-07-04?access_key={{fixer.io.key}}&base=EUR&symbols=USD")
+                        .to("mock:http:fixer")
                         .to("mock:result");
 
                 from("direct:getLatestDynamic")
                         .setExchangePattern(ExchangePattern.InOut)
                         .setHeader(Exchange.HTTP_METHOD, constant("GET"))
                         .setHeader(Exchange.HTTP_QUERY, simple("access_key={{fixer.io.key}}&base=EUR&symbols=USD"))
-                        .to("http://data.fixer.io/2016-07-04?access_key={{fixer.io.key}}")
+                        .to("mock:http:fixer")
                         .to("mock:dynamicResult");
-
 
                 from("direct:get100")
                         .setExchangePattern(ExchangePattern.InOut)
                         .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                        .to("http://data.fixer.io?access_key={{fixer.io.key}}")
+                        .to("mock:http:fixer")
                         .to("mock:yearTrend");
             }
         };
@@ -90,16 +90,20 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
 
     }
 
+    private static final String MOCK_FIXER_RESPONSE = "{\"success\":true,\"timestamp\":1467676799,\"historical\":true,\"base\":\"EUR\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.114951}}";
 
     @Test
     public void testGetLatestExchange() throws InterruptedException, IOException {
+        MockEndpoint httpMock = getMockEndpoint("mock:http:fixer");
+        httpMock.whenAnyExchangeReceived(exchange -> {
+            exchange.getIn().setBody(MOCK_FIXER_RESPONSE);
+        });
         MockEndpoint serviceResult = getMockEndpoint("mock:result");
         template.sendBody("direct:getLatest", "");
         serviceResult.expectedMessageCount(1);
-        String fourthOfJulyExpected = "{\"success\":true,\"timestamp\":1467676799,\"historical\":true,\"base\":\"EUR\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.114951}}";
-        String fourthOfJuly2016Query = IOUtils.toString((InputStream) serviceResult.getExchanges().get(0).getIn().getBody());
+        String fourthOfJuly2016Query = serviceResult.getExchanges().get(0).getIn().getBody(String.class);
         Assert.assertTrue(StringUtils.isNotEmpty(fourthOfJuly2016Query));
-        Assert.assertEquals(fourthOfJulyExpected, fourthOfJuly2016Query);
+        Assert.assertEquals(MOCK_FIXER_RESPONSE, fourthOfJuly2016Query);
         serviceResult.assertIsSatisfied();
 
     }
@@ -107,11 +111,15 @@ public class CurrencyExchangeServiceTest extends CamelTestSupport {
 
     @Test
     public void testGetLatestExchangeDynamicallyInJson() throws InterruptedException, IOException {
-        MockEndpoint jsonResult = getMockEndpoint("mock:getLatestDynamic");
-        String fourthOfJuly2016Query = IOUtils.toString((InputStream) template.requestBody("direct:getLatestDynamic", ""));
+        MockEndpoint httpMock = getMockEndpoint("mock:http:fixer");
+        httpMock.whenAnyExchangeReceived(exchange -> {
+            exchange.getIn().setBody(MOCK_FIXER_RESPONSE);
+        });
+        MockEndpoint jsonResult = getMockEndpoint("mock:dynamicResult");
+        String fourthOfJuly2016Query = template.requestBody("direct:getLatestDynamic", "", String.class);
         String fourthOfJuly2016Expected = "{\"success\":true,\"timestamp\":1467676799,\"historical\":true,\"base\":\"EUR\",\"date\":\"2016-07-04\",\"rates\":{\"USD\":1.114951}}";
         Assert.assertTrue(StringUtils.isNotEmpty(fourthOfJuly2016Query));
-        Assert.assertEquals(fourthOfJuly2016Expected, fourthOfJuly2016Query);
+        Assert.assertEquals(MOCK_FIXER_RESPONSE, fourthOfJuly2016Query);
         jsonResult.assertIsSatisfied();
     }
 
