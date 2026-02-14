@@ -6,10 +6,19 @@ import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import org.springframework.stereotype.Component;
+
+
+
 /**
+
  * Created by Vincent Stoessel on August 01, 2016.
+
  *
+
  */
+
+@Component
 
 public class XaymacaBootServices extends RouteBuilder {
 
