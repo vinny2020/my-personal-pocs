@@ -1,11 +1,12 @@
 package com.xaymaca.poc;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-//default SpringApplication , may delete if not useful
+@SpringBootApplication
 public class DemomvcApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DemomvcApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(DemomvcApplication.class, args);
+    }
 }
