@@ -30,23 +30,9 @@ public class XaymacaBootServices extends RouteBuilder {
                 .process(new Processor() {
                     @Override
                     public void process(Exchange exchange) throws Exception {
-                        StringBuilder response = new StringBuilder("Hello! We found these parameters in the query string: ");
-                        // Query parameters are mapped to headers when mapHeaders=true
-                        // They are usually prefixed with CamelHttpQuery.
-                        // Or simply CamelNettyHttp.query.
-                        // Iterate through headers and find query parameters.
-                        exchange.getIn().getHeaders().forEach((key, value) -> {
-                            if (key.startsWith("CamelHttpQuery.")) {
-                                response.append(key.substring("CamelHttpQuery.".length())).append("=").append(value).append(", ");
-                            } else if (key.startsWith("CamelNettyHttp.query.")) { // Fallback for Netty specific header name
-                                response.append(key.substring("CamelNettyHttp.query.".length())).append("=").append(value).append(", ");
-                            }
-                        });
-                        // Remove trailing ", " if any
-                        if (response.length() > "Hello! We found these parameters in the query string: ".length()) {
-                            response.setLength(response.length() - 2);
-                        }
-                        exchange.getIn().setBody(response.toString());
+                        String queryString = exchange.getIn().getHeader(Exchange.HTTP_QUERY, String.class);
+                        String response = "Hello! We found these parameters in the query string: " + (queryString != null ? queryString : "none");
+                        exchange.getIn().setBody(response);
                     }
                 })
 

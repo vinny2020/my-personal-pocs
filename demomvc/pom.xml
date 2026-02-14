@@ -171,7 +171,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${project.parent.version}</version>
 				<configuration>
-					<mainClass>org.apache.camel.spring.boot.FatJarRouter</mainClass>
+					<mainClass>com.xaymaca.poc.routes.XaymacaBootServices</mainClass>
 				</configuration>
 				<executions>
 					<execution>
