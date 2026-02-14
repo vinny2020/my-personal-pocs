@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * Created by Vincent Stoessel on August 01, 2016.
  *
  */
-@SpringBootApplication
+
 public class XaymacaBootServices extends RouteBuilder {
 
     @Override

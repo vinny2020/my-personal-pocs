@@ -168,7 +168,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${project.parent.version}</version>
 				<configuration>
-					<mainClass>com.xaymaca.poc.routes.XaymacaBootServices</mainClass>
+					<mainClass>com.xaymaca.poc.DemomvcApplication</mainClass>
 				</configuration>
 				<executions>
 					<execution>
