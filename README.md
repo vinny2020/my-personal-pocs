@@ -66,13 +66,13 @@ A Spring Boot application demonstrating web service integration using Apache Cam
 - HTTP request/response processing
 - Query string parameter handling
 - Echo service endpoints
-- Spring Boot auto-configuration
+- Spring Boot auto-configuration with `RouteBuilder`
+- Upgraded to modern Spring Boot and Apache Camel
 
 **Technology Stack:**
-- Spring Boot 1.4.0
-- Apache Camel 2.17.2
+- Spring Boot 4.0.2
+- Apache Camel 4.17.0
 - Netty HTTP components
-- Spring Boot FatJar integration
 
 **Available Endpoints:**
 - `GET /echo-query-string` - Echo query parameters
